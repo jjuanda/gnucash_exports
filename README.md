@@ -1,4 +1,4 @@
 gnucash_exports
 ===============
 
-GnuCash export scripts into several DBs/files
+GnuCash export scripts into several DBs/file formats
