@@ -1,3 +1,4 @@
+from datetime import datetime
 import sys
 import os
 from collections import defaultdict
@@ -12,7 +13,7 @@ client = MongoClient()
 
 
 dbfile = sys.argv[1]
-mongodbname = sys.argv[2]
+mongodbname = sys.argv[2] if len(sys.argv) > 2 else 'gnucash'
 mdb = client[mongodbname]
 
 db = sqlite3.connect(dbfile)
@@ -99,6 +100,20 @@ for tbl in tbls:
 
         mdb[tbl].update({'_id' : doc['_id']}, {'$rename' : keystorename})
 
+# Replace date fields
+for tbl in tbls:
+    for doc in mdb[tbl].find():
+        newvals = {}
+        modified = False
+        for k in doc.keys():
+            if k.endswith('_date'):
+                dk = doc[k]
+                if dk != '':
+                    newvals[k] = datetime.strptime(str(doc[k]), "%Y%m%d%H%M%S")
+                    modified = True
+
+        if modified:
+            mdb[tbl].update({'_id' : doc['_id']}, {'$set' : newvals})
 
 
 
